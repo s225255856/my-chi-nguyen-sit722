@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: 'Product environment'
         required: true
         type: string
 
@@ -68,6 +68,7 @@ jobs:
       # Tear down staging environment after testing
       - name: Destroy Staging
         run: |
+          kubectl delete -f task10_2dd/k8s/customer-service.yaml
           kubectl delete -f task10_2dd/k8s/product-service.yaml
           kubectl delete -f task10_2dd/k8s/order-service.yaml
           kubectl delete -f task10_2dd/k8s/frontend.yaml
