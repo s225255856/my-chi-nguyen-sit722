@@ -76,7 +76,8 @@ jobs:
           if [ "${{ matrix.service }}" == "frontend" ]; then
             cd frontend && npm install
           else
-            pip install -r ${{ matrix.path }}/requirements.txt
+            pip install --upgrade pip
+            pip install -r backend/${{ matrix.service }}/requirements.txt
             pip install pytest flake8
           fi
 
