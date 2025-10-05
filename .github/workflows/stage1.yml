@@ -146,3 +146,20 @@ jobs:
       # Logout from Azure to clean up session
       - name: Logout from Azure
         run: az logout
+
+      # Call Stage 2
+      - name: Trigger Stage 2
+  uses: actions/github-script@v6
+  with:
+    script: |
+      const workflow = 'stage2.yml';
+      const ref = 'testing'; // or use context.ref
+      const inputs = { environment: 'staging' };
+
+      await github.rest.actions.createWorkflowDispatch({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        workflow_id: workflow,
+        ref: ref,
+        inputs: inputs
+      });
