@@ -49,16 +49,16 @@ jobs:
       # Deploy backend services to staging environment
       - name: Deploy Backend
         run: |
-          kubectl apply -f k8s/secrets.yaml
-          kubectl apply -f k8s/product-db.yaml
-          kubectl apply -f k8s/order-db.yaml
-          kubectl apply -f k8s/product-service.yaml
-          kubectl apply -f k8s/order-service.yaml
+          kubectl apply -f task10_2dd/k8s/secrets.yaml
+          kubectl apply -f task10_2dd/k8s/product-db.yaml
+          kubectl apply -f task10_2dd/k8s/order-db.yaml
+          kubectl apply -f task10_2dd/k8s/product-service.yaml
+          kubectl apply -f task10_2dd/k8s/order-service.yaml
 
       # Deploy frontend service to staging
       - name: Deploy Frontend
         run: |
-          kubectl apply -f k8s/frontend.yaml
+          kubectl apply -f task10_2dd/k8s/frontend.yaml
 
       # Run a basic health check or acceptance test
       - name: Acceptance Test
@@ -68,9 +68,9 @@ jobs:
       # Tear down staging environment after testing
       - name: Destroy Staging
         run: |
-          kubectl delete -f k8s/product-service.yaml
-          kubectl delete -f k8s/order-service.yaml
-          kubectl delete -f k8s/frontend.yaml
+          kubectl delete -f task10_2dd/k8s/product-service.yaml
+          kubectl delete -f task10_2dd/k8s/order-service.yaml
+          kubectl delete -f task10_2dd/k8s/frontend.yaml
 
       # Logout from Azure to clean up session
       - name: Logout from Azure
