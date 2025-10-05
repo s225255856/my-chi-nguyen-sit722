@@ -75,7 +75,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           if [ "${{ matrix.service }}" == "frontend" ]; then
-            cd frontend && npm install
+            cd task10_2dd/frontend && npm install
           else
             pip install -r task10_2dd/backend/${{ matrix.service }}/requirements.txt
             pip install pytest flake8
