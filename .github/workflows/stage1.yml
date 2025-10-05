@@ -7,6 +7,7 @@ on:
     branches:
       - testing
 
+# For Git to call Stage 2
 permissions:
   actions: write
   contents: read
