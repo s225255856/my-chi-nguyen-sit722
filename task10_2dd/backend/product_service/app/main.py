@@ -9,6 +9,7 @@ from decimal import Decimal
 from typing import List, Optional
 from urllib.parse import urlparse
 
+
 import aio_pika
 
 from azure.storage.blob import (
@@ -31,6 +32,7 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import OperationalError, IntegrityError
 from sqlalchemy.orm import Session
+from app.routes.product_router import product_router
 
 from .db import Base, engine, get_db
 from .models import Product
@@ -110,6 +112,7 @@ app = FastAPI(
     description="Manages products and stock for mini-ecommerce app, with Azure Storage integration.",
     version="1.0.0",
 )
+app.include_router(product_router, prefix="/product")
 
 # Enable CORS (for frontend dev/testing)
 app.add_middleware(
@@ -395,7 +398,7 @@ async def startup_event():
 
 
 # --- Root Endpoint ---
-@app.get("/", status_code=status.HTTP_200_OK, summary="Root endpoint")
+@product_router.get("/", status_code=status.HTTP_200_OK, summary="Root endpoint")
 async def read_root():
     return {"message": "Welcome to the Product Service!"}
 
@@ -408,7 +411,7 @@ async def health_check():
 
 # --- CRUD Endpoints ---
 @app.post(
-    "/products/",
+    "/",
     response_model=ProductResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new product",

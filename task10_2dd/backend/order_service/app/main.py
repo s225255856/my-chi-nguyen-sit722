@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, joinedload
+from app.routes.order_router import order_router
 
 from .db import Base, SessionLocal, engine, get_db
 from .models import Order, OrderItem
@@ -60,6 +61,7 @@ app = FastAPI(
     description="Manages orders for mini-ecommerce app, with synchronous stock deduction.",
     version="1.0.0",
 )
+app.include_router(order_router, prefix="/order")
 
 # CORS
 app.add_middleware(
@@ -309,7 +311,7 @@ async def shutdown_event():
 
 
 # --- Root Endpoint ---
-@app.get("/", status_code=status.HTTP_200_OK, summary="Root endpoint")
+@order_router.get("/", status_code=status.HTTP_200_OK, summary="Root endpoint")
 async def read_root():
     return {"message": "Welcome to the Order Service!"}
 

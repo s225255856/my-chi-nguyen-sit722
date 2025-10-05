@@ -8,6 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
+from app.routes.customer_router import customer_router
 
 from .db import Base, engine, get_db
 from .models import Customer
@@ -37,6 +38,7 @@ app = FastAPI(
     description="Manages orders for mini-ecommerce app, with synchronous stock deduction.",
     version="1.0.0",
 )
+app.include_router(customer_router, prefix="/customer")
 
 # CORS
 app.add_middleware(
@@ -84,7 +86,7 @@ async def startup_event():
 
 
 # --- Root Endpoint ---
-@app.get("/", status_code=status.HTTP_200_OK, summary="Root endpoint")
+@customer_router.get("/", status_code=status.HTTP_200_OK, summary="Root endpoint")
 async def read_root():
     return {"message": "Welcome to the Customer Service!"}
 
@@ -97,7 +99,7 @@ async def health_check():
 
 # --- CRUD Endpoints for Customers ---
 @app.post(
-    "/customers/",
+    "/",
     response_model=CustomerResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new customer",
