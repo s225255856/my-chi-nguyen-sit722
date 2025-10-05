@@ -37,11 +37,11 @@ jobs:
       matrix:
         include:
           - service: frontend
-            path: ./frontend
+            path: ./task10_2dd/frontend
           - service: product_service
-            path: ./backend/product_service
+            path: ./task10_2dd/backend/product_service
           - service: order_service
-            path: ./backend/order_service
+            path: ./task10_2dd/backend/order_service
 
     steps:
       - name: Checkout code
@@ -107,11 +107,11 @@ jobs:
       matrix:
         include:
           - service: frontend
-            path: ./frontend
+            path: ./task10_2dd/frontend
           - service: product_service
-            path: ./backend/product_service
+            path: ./task10_2dd/backend/product_service
           - service: order_service
-            path: ./backend/order_service
+            path: ./task10_2dd/backend/order_service
 
     steps:
       - name: Checkout code
