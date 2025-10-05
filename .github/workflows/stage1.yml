@@ -89,7 +89,7 @@ jobs:
       # Run linting and tests for backend services
       - name: Run lint and tests
         run: |
-          if [ "${{ matrix.service}" == "frontend" ]; then
+          if [ "${{ matrix.service}}" == "frontend" ]; then
             echo "Skipping frontend tests"
           else
             flake8 backend/${{ matrix.service }}
