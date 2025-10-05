@@ -134,7 +134,7 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:${{ env.IMAGE_TAG }} ${{ matrix.path }}
-          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest
 
       # Logout from Azure to clean up session
       - name: Logout from Azure
