@@ -4,6 +4,13 @@ name: Stage 2 - Deploy to Staging
 # Triggered automatically after Stage 1 completes
 # Stage 1 is modified so it calls for Stage 2 to start at the end of the workflow
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: string
+
   workflow_call:
     inputs:
       environment:
