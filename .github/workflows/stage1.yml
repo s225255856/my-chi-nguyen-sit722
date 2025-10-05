@@ -78,6 +78,7 @@ jobs:
           else
             pip install -r backend/${{ matrix.service }}/requirements.txt
             pip install pytest flake8
+          fi
 
       # Create products database for product_service tests
       - name: Create products database
@@ -94,6 +95,7 @@ jobs:
           else
             flake8 backend/${{ matrix.service }}
             pytest backend/${{ matrix.service }}/tests
+          fi
 
   build-and-push:
     name: Build and Push Docker Images
