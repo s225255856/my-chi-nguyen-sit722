@@ -61,9 +61,15 @@ jobs:
           kubectl apply -f task10_2dd/k8s/frontend.yaml
 
       # Run a basic health check or acceptance test
+      # The machine will run a kubectl get service for frontend to grab its external IP
+      # Then they can check the link
+      # This is needed because in later step the services are destroyed
       - name: Acceptance Test
         run: |
-          curl -f http://4.237.149.92/ || exit 1
+          EXTERNAL_IP=$(kubectl get service frontend-w05-aks -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          echo "External IP is: $EXTERNAL_IP"
+          curl -f http://$EXTERNAL_IP/ || exit 1
+
 
       # Tear down staging environment after testing
       - name: Destroy Staging
