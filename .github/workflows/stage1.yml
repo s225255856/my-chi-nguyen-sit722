@@ -77,7 +77,7 @@ jobs:
           if [ "${{ matrix.service }}" == "frontend" ]; then
             cd frontend && npm install
           else
-            pip install -r backend/${{ matrix.service }}/requirements.txt
+            pip install -r task10_2dd/backend/${{ matrix.service }}/requirements.txt
             pip install pytest flake8
           fi
 
@@ -94,8 +94,8 @@ jobs:
           if [ "${{ matrix.service}}" == "frontend" ]; then
             echo "Skipping frontend tests"
           else
-            flake8 backend/${{ matrix.service }}
-            pytest backend/${{ matrix.service }}/tests
+            flake8 task10_2dd/backend/${{ matrix.service }}
+            pytest task10_2dd/backend/${{ matrix.service }}/tests
           fi
 
   build-and-push:
