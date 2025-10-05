@@ -1,11 +1,21 @@
 name: Stage 2 - Deploy to Staging
 
+#Attempt 43
 # Triggered automatically after Stage 1 completes
-#on:
-#  workflow_run:
-#    workflows: ["Stage 1 - CI Pipeline"]
-#    types:
-#      - completed
+# Stage 1 is modified so it calls for Stage 2 to start at the end of the workflow
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Product environment'
+        required: true
+        type: string
+
+  #workflow_call:
+  # inputs:
+  #   environment:
+  #     required: true
+  #     type: string
 
 jobs:
   deploy-to-staging:
@@ -22,37 +32,67 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # Set correct subscription
+      - name: Set subscription
+        run: az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+
+      # Debug
+      - name: Show ACR
+        run: echo "ACR_LOGIN_SERVER=${{ secrets.AZURE_CONTAINER_REGISTRY }}"
+
       # Set AKS context and attach ACR for image pulling
       - name: Set AKS context
         run: |
           az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --overwrite-existing
-          az aks update --name ${{ secrets.AKS_CLUSTER_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --attach-acr ${{ secrets.ACR_LOGIN_SERVER }}
+          az aks update --name ${{ secrets.AKS_CLUSTER_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --attach-acr ${{ secrets.AZURE_CONTAINER_REGISTRY }}
 
       # Deploy backend services to staging environment
       - name: Deploy Backend
         run: |
-          kubectl apply -f k8s/secrets.yaml
-          kubectl apply -f k8s/product-db.yaml
-          kubectl apply -f k8s/order-db.yaml
-          kubectl apply -f k8s/product-service.yaml
-          kubectl apply -f k8s/order-service.yaml
+          kubectl apply -f task10_2dd/k8s/secrets.yaml
+          kubectl apply -f task10_2dd/k8s/product-db.yaml
+          kubectl apply -f task10_2dd/k8s/order-db.yaml
+          kubectl apply -f task10_2dd/k8s/product-service.yaml
+          kubectl apply -f task10_2dd/k8s/order-service.yaml
 
       # Deploy frontend service to staging
       - name: Deploy Frontend
         run: |
-          kubectl apply -f k8s/frontend.yaml
+          kubectl apply -f task10_2dd/k8s/frontend.yaml
 
       # Run a basic health check or acceptance test
+      # The machine will run a kubectl get service for frontend to grab its external IP, multiple time to ensure it is loaded properly
+      # Then they can check the link 
+      # If no externa IP was provided, it exit gracefully
+      # This is needed because in later step the services are destroyed
       - name: Acceptance Test
         run: |
-          curl -f http://staging-frontend-url/health || exit 1
+          echo "Waiting for external IP..."
+          for i in {1..10}; do
+            EXTERNAL_IP=$(kubectl get service frontend-w05-aks -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            if [ -n "$EXTERNAL_IP" ]; then
+              echo "External IP is: $EXTERNAL_IP"
+              break
+            fi
+            echo "External IP not assigned yet. Retrying in 10s..."
+            sleep 10
+          done
+
+          if [ -z "$EXTERNAL_IP" ]; then
+            echo "Failed to get external IP after waiting. Exiting."
+            exit 1
+          fi
+
+          curl -f http://$EXTERNAL_IP/ || exit 1
+
 
       # Tear down staging environment after testing
       - name: Destroy Staging
         run: |
-          kubectl delete -f k8s/product-service.yaml
-          kubectl delete -f k8s/order-service.yaml
-          kubectl delete -f k8s/frontend.yaml
+          kubectl delete -f task10_2dd/k8s/customer-service.yaml --ignore-not-found
+          kubectl delete -f task10_2dd/k8s/product-service.yaml --ignore-not-found
+          kubectl delete -f task10_2dd/k8s/order-service.yaml --ignore-not-found
+          kubectl delete -f task10_2dd/k8s/frontend.yaml --ignore-not-found
 
       # Logout from Azure to clean up session
       - name: Logout from Azure
