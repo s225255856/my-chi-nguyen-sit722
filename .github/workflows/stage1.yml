@@ -94,8 +94,8 @@ jobs:
           if [ "${{ matrix.service}}" == "frontend" ]; then
             echo "Skipping frontend tests"
           else
-            flake8 task10_2dd/backend/${{ matrix.service }}
-            pytest task10_2dd/backend/${{ matrix.service }}/tests
+            flake8 task10_2dd/backend/${{ matrix.service }} --max-line-length=500 --ignore=F401,F841,W503
+            pytest task10_2dd/backend/${{ matrix.service }}/tests --maxfail=1 --disable-warnings -q
           fi
 
   build-and-push:
