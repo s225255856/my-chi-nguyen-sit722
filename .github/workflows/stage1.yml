@@ -136,6 +136,9 @@ jobs:
       - name: Show image tag
         run: echo "${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest"
 
+      - name: Confirm azure cred
+        run: echo "${{ secrets.AZURE_CREDENTIALS }}"
+
       # Build and push Docker image for each service
       - name: Build and Push Docker Image
         run: |
