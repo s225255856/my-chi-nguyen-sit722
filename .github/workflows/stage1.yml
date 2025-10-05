@@ -8,7 +8,7 @@ on:
       - testing
 
 env:
-  ACR_LOGIN_SERVER: AZURE_CONTAINER_REGISTRY
+  ACR_LOGIN_SERVER: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
   IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}
 
 jobs:
