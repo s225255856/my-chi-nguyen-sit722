@@ -8,7 +8,7 @@ on:
       - testing
 
 env:
-  ACR_LOGIN_SERVER: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+  ACR_LOGIN_SERVER: ACR_LOGIN_SERVER
   IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}
 
 jobs:
@@ -130,18 +130,12 @@ jobs:
       - name: Login to ACR
         run: az acr login --name ${{ env.ACR_LOGIN_SERVER }}
 
-      - name: Docker Login to ACR
-        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login mcnweek10acr.azurecr.io -u "${{ secrets.ACR_USERNAME }}" --password-stdin
+      #- name: Docker Login to ACR
+      #  run: echo "${{ secrets.ACR_PASSWORD }}" | docker login mcnweek10acr.azurecr.io -u "${{ secrets.ACR_USERNAME }}" --password-stdin
 
       # Debugging
-      - name: Confirm Docker login
-        run: docker info
-
       - name: Show image tag
         run: echo "${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest"
-
-      - name: Confirm azure cred
-        run: echo "${{ secrets.AZURE_CREDENTIALS }}"
 
       # Build and push Docker image for each service
       - name: Build and Push Docker Image
