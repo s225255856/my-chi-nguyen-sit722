@@ -131,8 +131,9 @@ jobs:
         run: az acr login --name ${{ env.ACR_LOGIN_SERVER }}
 
       - name: Docker Login to ACR
-        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ env.ACR_LOGIN_SERVER }} -u "${{ secrets.ACR_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login mcnweek10acr.azurecr.io -u "${{ secrets.ACR_USERNAME }}" --password-stdin
 
+      # Debugging
       - name: Confirm Docker login
         run: docker info
 
