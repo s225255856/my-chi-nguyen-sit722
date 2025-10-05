@@ -61,13 +61,28 @@ jobs:
           kubectl apply -f task10_2dd/k8s/frontend.yaml
 
       # Run a basic health check or acceptance test
-      # The machine will run a kubectl get service for frontend to grab its external IP
-      # Then they can check the link
+      # The machine will run a kubectl get service for frontend to grab its external IP, multiple time to ensure it is loaded properly
+      # Then they can check the link 
+      # If no externa IP was provided, it exit gracefully
       # This is needed because in later step the services are destroyed
       - name: Acceptance Test
         run: |
-          EXTERNAL_IP=$(kubectl get service frontend-w05-aks -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-          echo "External IP is: $EXTERNAL_IP"
+          echo "Waiting for external IP..."
+          for i in {1..10}; do
+            EXTERNAL_IP=$(kubectl get service frontend-w05-aks -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            if [ -n "$EXTERNAL_IP" ]; then
+              echo "External IP is: $EXTERNAL_IP"
+              break
+            fi
+            echo "External IP not assigned yet. Retrying in 10s..."
+            sleep 10
+          done
+
+          if [ -z "$EXTERNAL_IP" ]; then
+            echo "Failed to get external IP after waiting. Exiting."
+            exit 1
+          fi
+
           curl -f http://$EXTERNAL_IP/ || exit 1
 
 
