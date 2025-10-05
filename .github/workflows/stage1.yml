@@ -130,6 +130,12 @@ jobs:
       - name: Login to ACR
         run: az acr login --name ${{ env.ACR_LOGIN_SERVER }}
 
+      - name: Confirm Docker login
+        run: docker info
+
+      - name: Show image tag
+        run: echo "${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest"
+
       # Build and push Docker image for each service
       - name: Build and Push Docker Image
         run: |
