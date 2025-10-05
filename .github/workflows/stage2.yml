@@ -63,7 +63,7 @@ jobs:
       # Run a basic health check or acceptance test
       - name: Acceptance Test
         run: |
-          curl -f http://4.147.129.204/ || exit 1
+          curl -f http://4.254.21.155/ || exit 1
 
       # Tear down staging environment after testing
       - name: Destroy Staging
