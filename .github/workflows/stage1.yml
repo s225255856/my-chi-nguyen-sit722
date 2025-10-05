@@ -1,0 +1,134 @@
+name: Stage 1 - CI Pipeline
+
+# Triggered when pushed to testing branch
+on:
+  push:
+    branches:
+      - testing
+
+env:
+  ACR_LOGIN_SERVER: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+  IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}
+
+jobs:
+  build-and-test:
+    name: Build and Test Services
+    runs-on: ubuntu-latest
+
+    # Set up PostgreSQL service for order_service tests
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: orders
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    # Run tests for each service using a matrix strategy
+    strategy:
+      matrix:
+        include:
+          - service: frontend
+            path: ./frontend
+          - service: product_service
+            path: ./backend/product_service
+          - service: order_service
+            path: ./backend/order_service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Node.js for frontend
+      - name: Set up Node.js
+        if: ${{ matrix.service == 'frontend' }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Set up Python for backend services
+      - name: Set up Python
+        if: ${{ matrix.service != 'frontend' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Cache dependencies to speed up builds
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/pip
+          key: ${{ runner.os }}-${{ matrix.service }}-${{ hashFiles('**/package-lock.json', '**/requirements.txt') }}
+
+      # Install dependencies for each service
+      - name: Install dependencies
+        run: |
+          if [ "${{ matrix.service }}" == "frontend" ]; then
+            cd frontend && npm install
+          else
+            pip install -r backend/${{ matrix.service }}/requirements.txt
+            pip install pytest flake8
+
+      # Create products database for product_service tests
+      - name: Create products database
+        if: ${{ matrix.service == 'product_service' }}
+        run: |
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=postgres psql -h localhost -U postgres -p 5432 -c "CREATE DATABASE products;"
+
+      # Run linting and tests for backend services
+      - name: Run lint and tests
+        run: |
+          if [ "${{ matrix.service}" == "frontend" ]; then
+            echo "Skipping frontend tests"
+          else
+            flake8 backend/${{ matrix.service }}
+            pytest backend/${{ matrix.service }}/tests
+
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    strategy:
+      matrix:
+        include:
+          - service: frontend
+            path: ./frontend
+          - service: product_service
+            path: ./backend/product_service
+          - service: order_service
+            path: ./backend/order_service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Login to Azure using service principal credentials
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Authenticate with Azure Container Registry
+      - name: Login to ACR
+        run: az acr login --name ${{ env.ACR_LOGIN_SERVER }}
+
+      # Build and push Docker image for each service
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:${{ env.IMAGE_TAG }} ${{ matrix.path }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+
+      # Logout from Azure to clean up session
+      - name: Logout from Azure
+        run: az logout

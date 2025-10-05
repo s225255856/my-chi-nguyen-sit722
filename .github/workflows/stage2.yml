@@ -1,0 +1,59 @@
+name: Stage 2 - Deploy to Staging
+
+# Triggered automatically after Stage 1 completes
+on:
+  workflow_run:
+    workflows: ["Stage 1 - CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy-to-staging:
+    name: Deploy to Staging AKS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Login to Azure using service principal credentials
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Set AKS context and attach ACR for image pulling
+      - name: Set AKS context
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --overwrite-existing
+          az aks update --name ${{ secrets.AKS_CLUSTER_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --attach-acr ${{ secrets.ACR_LOGIN_SERVER }}
+
+      # Deploy backend services to staging environment
+      - name: Deploy Backend
+        run: |
+          kubectl apply -f k8s/secrets.yaml
+          kubectl apply -f k8s/product-db.yaml
+          kubectl apply -f k8s/order-db.yaml
+          kubectl apply -f k8s/product-service.yaml
+          kubectl apply -f k8s/order-service.yaml
+
+      # Deploy frontend service to staging
+      - name: Deploy Frontend
+        run: |
+          kubectl apply -f k8s/frontend.yaml
+
+      # Run a basic health check or acceptance test
+      - name: Acceptance Test
+        run: |
+          curl -f http://staging-frontend-url/health || exit 1
+
+      # Tear down staging environment after testing
+      - name: Destroy Staging
+        run: |
+          kubectl delete -f k8s/product-service.yaml
+          kubectl delete -f k8s/order-service.yaml
+          kubectl delete -f k8s/frontend.yaml
+
+      # Logout from Azure to clean up session
+      - name: Logout from Azure
+        run: az logout
