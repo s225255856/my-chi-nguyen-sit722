@@ -11,11 +11,11 @@ on:
         required: true
         type: string
 
-  workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
+  #workflow_call:
+  # inputs:
+  #   environment:
+  #     required: true
+  #     type: string
 
 jobs:
   deploy-to-staging:
@@ -44,7 +44,7 @@ jobs:
       - name: Set AKS context
         run: |
           az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }} --overwrite-existing
-          az aks update --name ${{ secrets.AKS_CLUSTER_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --attach-acr ${{ secrets.ACR_LOGIN_SERVER }}
+          az aks update --name ${{ secrets.AKS_CLUSTER_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --attach-acr ${{ secrets.AZURE_CONTAINER_REGISTRY }}
 
       # Deploy backend services to staging environment
       - name: Deploy Backend
