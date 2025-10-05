@@ -89,10 +89,10 @@ jobs:
       # Tear down staging environment after testing
       - name: Destroy Staging
         run: |
-          kubectl delete -f task10_2dd/k8s/customer-service.yaml
-          kubectl delete -f task10_2dd/k8s/product-service.yaml
-          kubectl delete -f task10_2dd/k8s/order-service.yaml
-          kubectl delete -f task10_2dd/k8s/frontend.yaml
+          kubectl delete -f task10_2dd/k8s/customer-service.yaml --ignore-not-found
+          kubectl delete -f task10_2dd/k8s/product-service.yaml --ignore-not-found
+          kubectl delete -f task10_2dd/k8s/order-service.yaml --ignore-not-found
+          kubectl delete -f task10_2dd/k8s/frontend.yaml --ignore-not-found
 
       # Logout from Azure to clean up session
       - name: Logout from Azure
