@@ -8,7 +8,7 @@ on:
       - testing
 
 env:
-  ACR_LOGIN_SERVER: ACR_LOGIN_SERVER
+  ACR_LOGIN_SERVER: AZURE_CONTAINER_REGISTRY
   IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}
 
 jobs:
@@ -140,8 +140,8 @@ jobs:
       # Build and push Docker image for each service
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest ${{ matrix.path }}
-          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest ${{ matrix.path }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service }}:latest
 
       # Logout from Azure to clean up session
       - name: Logout from Azure
