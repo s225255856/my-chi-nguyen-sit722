@@ -1,12 +1,13 @@
 name: Stage 2 - Deploy to Staging
 
 #Attempt 43
-# Triggered automatically after Stage 1 completes
+# Triggered automatically after Stage 1 completes + manual trigger for quick testing
 on:
   workflow_run:
     workflows: ["Stage 1 - CI Pipeline"]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   deploy-to-staging:
