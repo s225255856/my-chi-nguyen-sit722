@@ -72,11 +72,11 @@ jobs:
 
       # Install dependencies for each service
       - name: Install dependencies
+        working-directory: ${{ github.workspace }}
         run: |
           if [ "${{ matrix.service }}" == "frontend" ]; then
             cd frontend && npm install
           else
-            pip install --upgrade pip
             pip install -r backend/${{ matrix.service }}/requirements.txt
             pip install pytest flake8
           fi
