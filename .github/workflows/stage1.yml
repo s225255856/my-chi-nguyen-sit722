@@ -47,6 +47,8 @@ jobs:
             path: ./task10_2dd/backend/product_service
           - service: order_service
             path: ./task10_2dd/backend/order_service
+          - service: customer_service
+            path: ./task10_2dd/backend/customer_service
 
     steps:
       - name: Checkout code
@@ -120,6 +122,8 @@ jobs:
             path: ./task10_2dd/backend/product_service
           - service: order_service
             path: ./task10_2dd/backend/order_service
+          - service: customer_service
+            path: ./task10_2dd/backend/customer_service
 
     steps:
       - name: Checkout code
